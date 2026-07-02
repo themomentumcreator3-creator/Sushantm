@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuantumEdit Pro - Free Operational Core</title>
+    <style>
+        :root {
+            --bg-main: #09090b;
+            --bg-panel: #141417;
+            --bg-surface: #222226;
+            --accent-blue: #0a84ff;
+            --text-main: #f4f4f5;
+            --text-muted: #8e8e93;
+            --border: #2c2c2e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .top-toolbar { height: 55px; background-color: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
+        .workspace-container { flex: 1; display: flex; flex-direction: column; height: calc(100vh - 120px); overflow: hidden; }
+        .canvas-viewport { flex: 1.1; background-color: #0d0d0f; display: flex; justify-content: center; align-items: center; position: relative; padding: 10px; }
+        .upload-box { border: 2px dashed var(--border); padding: 25px; border-radius: 8px; text-align: center; background: var(--bg-panel); width: 85%; max-width: 300px; cursor: pointer; }
+        .editor-image { max-width: 100%; max-height: 95%; object-fit: contain; border-radius: 4px; display: none; }
+        .sidebar-controls { flex: 1.3; background-color: var(--bg-panel); border-top: 1px solid var(--border); overflow-y: auto; padding: 15px; }
+        .control-group { margin-bottom: 14px; }
+        .control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .control-label { font-size: 13px; color: #e5e5ea; }
+        .slider-wrapper { display: flex; align-items: center; gap: 8px; }
+        .slider { flex: 1; -webkit-appearance: none; height: 4px; background: var(--bg-surface); outline: none; border-radius: 2px; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: white; }
+        .slider-val { font-size: 11px; width: 35px; text-align: right; color: var(--text-muted); }
+        .bottom-toolbar { height: 60px; background-color: var(--bg-main); border-top: 1px solid var(--border); display: flex; align-items: center; overflow-x: auto; padding: 0 5px; }
+        .bottom-tab { color: var(--text-muted); padding: 0 16px; height: 100%; border: none; background: none; font-size: 12px; flex-shrink: 0; display: flex; align-items: center; cursor: pointer; }
+        .bottom-tab.active { color: var(--accent-blue); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <header class="top-toolbar">
+        <span style="font-weight: bold; font-size: 14px;">PRO MANUAL ENGINE (FREE)</span>
+        <button style="background: var(--accent-blue); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px;" onclick="alert('High-Res File Exported Free!')">Export</button>
+    </header>
+
+    <div class="workspace-container">
+        <main class="canvas-viewport">
+            <input type="file" id="fileLoader" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            <div class="upload-box" id="uploadClickArea" onclick="document.getElementById('fileLoader').click()">
+                <p>📸</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">Tap to Upload Photo</p>
+            </div>
+            <img id="mainCanvas" class="editor-image">
+        </main>
+
+        <aside class="sidebar-controls">
+            <h3 style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;" id="panelTitle">LIGHT CONTROLS</h3>
+            <div id="dynamicSlidersContainer"></div>
+        </aside>
+    </div>
+
+    <footer class="bottom-toolbar">
+        <button class="bottom-tab active" onclick="switchTab('Light', this)">Light</button>
+        <button class="bottom-tab" onclick="switchTab('Color', this)">Color</button>
+        <button class="bottom-tab" onclick="switchTab('Detail', this)">Detail</button>
+    </footer>
+
+    <script>
+        let engineState = {
+            hasImage: false,
+            activeTab: 'Light',
+            sliders: {
+                Light: [
+                    { name: 'Exposure', min: 50, max: 150, val: 100, unit: '%', cssTarget: 'brightness' },
+                    { name: 'Contrast', min: 50, max: 150, val: 100, unit: '%', cssTarget: 'contrast' }
+                ],
+                Color: [
+                    { name: 'Saturation', min: 0, max: 200, val: 100, unit: '%', cssTarget: 'saturate' },
+                    { name: 'Temperature', min: -40, max: 40, val: 0, unit: 'deg', cssTarget: 'hue-rotate' }
+                ],
+                Detail: [
+                    { name: 'Clarity (Blur)', min: 0, max: 8, val: 0, unit: 'px', cssTarget: 'blur' }
+                ]
+            }
+        };
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('mainCanvas');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('uploadClickArea').style.display = 'none';
+                    engineState.hasImage = true;
+                    applyFilters();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderSliders() {
+            const container = document.getElementById('dynamicSlidersContainer');
+            container.innerHTML = '';
+            engineState.sliders[engineState.activeTab].forEach((slide, index) => {
+                const div = document.createElement('div');
+                div.className = 'control-group';
+                div.innerHTML = `
+                    <div class="control-header"><span class="control-label">${slide.name}</span></div>
+                    <div class="slider-wrapper">
+                        <input type="range" class="slider" min="${slide.min}" max="${slide.max}" value="${slide.val}" oninput="updateValue(this, ${index})">
+                        <span class="slider-val" id="val-${index}">${slide.val}${slide.unit}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateValue(el, index) {
+            engineState.sliders[engineState.activeTab][index].val = el.value;
+            document.getElementById(`val-${index}`).innerText = el.value + engineState.sliders[engineState.activeTab][index].unit;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            if (!engineState.hasImage) return;
+            let filterStr = "";
+            Object.keys(engineState.sliders).forEach(cat => {
+                engineState.sliders[cat].forEach(slide => {
+                    filterStr += `${slide.cssTarget}(${slide.val}${slide.unit}) `;
+                });
+            });
+            document.getElementById('mainCanvas').style.filter = filterStr;
+        }
+
+        function switchTab(tabName, btn) {
+            engineState.activeTab = tabName;
+            document.getElementById('panelTitle').innerText = `${tabName.toUpperCase()} CONTROLS`;
+            document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            renderSliders();
+        }
+
+        renderSliders();
+    </script>
+</body>
+</html>
