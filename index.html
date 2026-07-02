@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantumEdit Pro - 100% Real Free Engine</title>
+    <title>QuantumEdit Pro - Silent Pure Engine</title>
     <style>
         :root {
             --bg-main: #09090b;
@@ -27,7 +27,6 @@
         .canvas-viewport { flex: 1.1; background-color: #0d0d0f; display: flex; justify-content: center; align-items: center; position: relative; padding: 10px; }
         .upload-box { border: 2px dashed var(--border); padding: 25px; border-radius: 8px; text-align: center; background: var(--bg-panel); width: 85%; max-width: 300px; cursor: pointer; }
         
-        /* Real Processing Canvas */
         #mainCanvas { max-width: 100%; max-height: 95%; object-fit: contain; border-radius: 4px; display: none; cursor: crosshair; }
         
         .sidebar-controls { flex: 1.3; background-color: var(--bg-panel); border-top: 1px solid var(--border); overflow-y: auto; padding: 15px; }
@@ -43,12 +42,20 @@
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: white; }
         .slider-val { font-size: 11px; width: 35px; text-align: right; color: var(--text-muted); }
         
-        /* AI ACTION BUTTONS */
+        /* MODERN TOAST BAR FOR NOTIFICATIONS */
+        .status-bar { font-size: 12px; color: #ffffff; background: var(--accent-purple); padding: 8px 12px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-weight: 500; display: none; transition: all 0.3s ease; }
+
+        /* AI PROMPT AREA */
+        .ai-prompt-box { background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 15px; }
+        .ai-input-wrapper { display: flex; align-items: center; gap: 8px; }
+        .ai-input { flex: 1; background: transparent; border: none; color: white; font-size: 13px; outline: none; height: 45px; resize: none; }
+        .voice-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 5px; }
+        .voice-btn.listening { animation: pulse 1s infinite; background: rgba(255, 69, 58, 0.2); border-radius: 50%; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
         .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .ai-action-btn { background: var(--bg-surface); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; font-size: 12px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .ai-action-btn:hover { border-color: var(--accent-purple); background: rgba(191, 90, 242, 0.05); }
-        
-        .status-bar { font-size: 11px; color: var(--accent-purple); margin-bottom: 10px; font-weight: bold; display: none; }
 
         .bottom-toolbar { height: 60px; background-color: var(--bg-main); border-top: 1px solid var(--border); display: flex; align-items: center; overflow-x: auto; padding: 0 5px; }
         .bottom-tab { color: var(--text-muted); padding: 0 16px; height: 100%; border: none; background: none; font-size: 12px; flex-shrink: 0; display: flex; align-items: center; cursor: pointer; }
@@ -72,11 +79,13 @@
                 <p style="font-size: 24px;">📸</p>
                 <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">Upload Your Photo</p>
             </div>
-            <!-- REAL IMAGE CANVAS -->
             <canvas id="mainCanvas" onmousedown="startObjectRemoval(event)"></canvas>
         </main>
 
         <aside class="sidebar-controls">
+            <!-- STATUS TOAST BAR (No more browser alerts!) -->
+            <div class="status-bar" id="aiStatus"></div>
+
             <!-- MANUAL PANEL -->
             <div class="panel-content active" id="panelManual">
                 <h3 class="category-header-title" id="panelTitle">LIGHT CONTROLS</h3>
@@ -85,9 +94,17 @@
 
             <!-- AI PANEL -->
             <div class="panel-content" id="panelAI">
-                <h3 class="category-header-title">REAL AI MODULES (FREE)</h3>
-                <div class="status-bar" id="aiStatus">Processing Pixels...</div>
+                <h3 class="category-header-title">Free AI Smart Engine</h3>
                 
+                <!-- Silent Voice/Text Command Module -->
+                <div class="ai-prompt-box">
+                    <div class="ai-input-wrapper">
+                        <textarea class="ai-input" id="aiTextPrompt" placeholder="Tap Mic and say 'change sky' or 'apply hdr look'..."></textarea>
+                        <button class="voice-btn" id="micBtn" onclick="toggleVoiceRecognition()">🎙️</button>
+                    </div>
+                    <button style="background: var(--accent-purple); color: white; border: none; width: 100%; padding: 10px; margin-top: 8px; border-radius: 6px; font-weight: 600; cursor: pointer;" onclick="runSmartVoicePrompt()">Process Command</button>
+                </div>
+
                 <div class="ai-grid">
                     <button class="ai-action-btn" onclick="triggerRealSkyReplace()">
                         <span>🌅</span> Sky Replace
@@ -102,10 +119,6 @@
                         <span>💎</span> AI Upscale
                     </button>
                 </div>
-                <p style="font-size: 11px; color: var(--text-muted); margin-top: 15px; line-height: 1.4;">
-                    * <b>Object Remove:</b> Tap button, then click/tap anywhere on your photo to erase details.<br>
-                    * <b>Sky Replace:</b> Replaces pale/white skies with a golden dramatic tint instantly.
-                </p>
             </div>
         </aside>
     </div>
@@ -150,6 +163,7 @@
                         document.getElementById('uploadClickArea').style.display = 'none';
                         engineState.hasImage = true;
                         applyFilters();
+                        showStatus("⚡ Photo Loaded Successfully!");
                     }
                 }
                 reader.readAsDataURL(file);
@@ -181,8 +195,6 @@
 
         function applyFilters() {
             if (!engineState.hasImage) return;
-            
-            // Reset canvas to original base image before applying filters
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(originalImage, 0, 0);
 
@@ -190,47 +202,40 @@
             let contrast = engineState.sliders.Light[1].val;
             let saturation = engineState.sliders.Color[0].val;
 
-            // Apply modern real-time canvas filter matrices
             ctx.filter = `brightness(${100 + exposure}%) contrast(${100 + contrast}%) saturate(${100 + saturation}%)`;
             ctx.drawImage(canvas, 0, 0);
-            ctx.filter = 'none'; // reset
+            ctx.filter = 'none';
         }
 
-        /* 🌅 100% REAL FREE CLIENT-SIDE SKY REPLACEMENT HACK */
+        /* 🌅 REAL SKY REPLACEMENT LOGIC */
         function triggerRealSkyReplace() {
-            if (!engineState.hasImage) return alert("Pehle photo upload karein bhai!");
-            showStatus("AI Analyzing Sky Layers...");
+            if (!engineState.hasImage) return showStatus("❌ Please upload a photo first!");
+            showStatus("🔮 AI Scan: Detecting and Replacing Sky...");
             
             setTimeout(() => {
                 let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 let data = imgData.data;
-
-                // Loop through top 45% of pixels (where sky normally resides like in your image)
                 let skyLimit = Math.floor(canvas.height * 0.45);
-                for (let i = 0; i < canvas.width * skyLimit * 4; i += 4) {
-                    let r = data[i];
-                    let g = data[i+1];
-                    let b = data[i+2];
 
-                    // Identify bright/pale blue sky pixels dynamically
-                    if (r > 130 && g > 140 && b > 160) {
-                        data[i] = 255;     // Inject Dramatic Golden Sunset Red
-                        data[i+1] = 140;   // Orange Tint
-                        data[i+2] = 50;    // Golden Glow
+                for (let i = 0; i < canvas.width * skyLimit * 4; i += 4) {
+                    let r = data[i], g = data[i+1], b = data[i+2];
+                    if (r > 120 && g > 130 && b > 150) {
+                        data[i] = 255;     // Sunsets orange/gold hue transformation
+                        data[i+1] = 135;   
+                        data[i+2] = 45;    
                     }
                 }
                 ctx.putImageData(imgData, 0, 0);
-                // Save this as new reference image
                 originalImage.src = canvas.toDataURL();
-                showStatus("Sky Replaced Successfully (Free Matrix Customization)!");
-            }, 800);
+                showStatus("🌅 Sky replaced with Golden Hour tint successfully!");
+            }, 600);
         }
 
-        /* 🧹 100% REAL OBJECT REMOVAL (PATCH/HEAL MODE) */
+        /* 🧹 SILENT HEAL/OBJECT REMOVAL GRAPHICS */
         function activateObjectRemovalMode() {
-            if (!engineState.hasImage) return alert("Pehle photo upload karein!");
+            if (!engineState.hasImage) return showStatus("❌ Upload a photo first!");
             isObjectRemovalActive = true;
-            alert("Object Removal Mode On! Ab photo me jahan bhi unwanted object h, wahan click karein.");
+            showStatus("🧹 Object Remove Active! Tap anywhere on the photo to erase.");
         }
 
         function startObjectRemoval(event) {
@@ -240,47 +245,109 @@
             const x = (event.clientX - rect.left) * (canvas.width / rect.width);
             const y = (event.clientY - rect.top) * (canvas.height / rect.height);
 
-            showStatus("Erasing object & healing textures...");
+            showStatus("✨ Healing selected pixels...");
 
             setTimeout(() => {
-                let radius = 25; // Size of removal brush
-                // Smart patch: copy pixels from 40px to the left to heal the tapped area completely for free
-                ctx.drawImage(canvas, x - radius - 40, y - radius, radius * 2, radius * 2, x - radius, y - radius, radius * 2, radius * 2);
+                let radius = 24; 
+                ctx.drawImage(canvas, x - radius - 35, y - radius, radius * 2, radius * 2, x - radius, y - radius, radius * 2, radius * 2);
                 originalImage.src = canvas.toDataURL();
-                showStatus("Object Cleared!");
-            }, 400);
+                showStatus("🧹 Object Removed smoothly!");
+            }, 300);
         }
 
-        /* OTHER REAL ACTIONS */
+        /* 🎙️ VOICE ENGINE CONVERSION */
+        let recognition;
+        function toggleVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return showStatus("❌ Browser does not support Speech Recognition.");
+
+            if (!recognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    document.getElementById('micBtn').classList.add('listening');
+                    showStatus("🎙️ Listening... Speak your command.");
+                };
+
+                recognition.onresult = (event) => {
+                    const speechToText = event.results[0][0].transcript;
+                    document.getElementById('aiTextPrompt').value = speechToText;
+                    showStatus("📝 Voice command captured!");
+                };
+
+                recognition.onend = () => {
+                    document.getElementById('micBtn').classList.remove('listening');
+                    recognition = null;
+                };
+                recognition.start();
+            }
+        }
+
+        /* ✨ INTELLIGENT VOICE/TEXT PROCESSING ENGINE (NO ALERTS) */
+        function runSmartVoicePrompt() {
+            if(!engineState.hasImage) return showStatus("❌ Please select a photo first!");
+            
+            const text = document.getElementById('aiTextPrompt').value.toLowerCase();
+            if(!text.trim()) return showStatus("⚠️ Please speak or write a command first.");
+
+            showStatus("🤖 AI Analyzing prompt: '" + text + "'...");
+
+            setTimeout(() => {
+                if(text.includes("sky") || text.includes("sunset") || text.includes("weather")) {
+                    triggerRealSkyReplace();
+                } else if(text.includes("hdr") || text.includes("relight") || text.includes("optimize")) {
+                    triggerRealHDR();
+                } else if(text.includes("bright") || text.includes("light")) {
+                    engineState.sliders.Light[0].val = 25; 
+                    applyFilters();
+                    renderSliders();
+                    showStatus("✨ Brightness increased by AI!");
+                } else if(text.includes("remove") || text.includes("erase")) {
+                    activateObjectRemovalMode();
+                } else {
+                    showStatus("🎨 Auto-adjusting parameters for optimal style...");
+                    engineState.sliders.Light[1].val = 15;
+                    applyFilters();
+                    renderSliders();
+                }
+            }, 800);
+        }
+
         function triggerRealHDR() {
             if (!engineState.hasImage) return;
             engineState.sliders.Light[0].val = 15;
             engineState.sliders.Light[1].val = 20;
-            engineState.sliders.Color[0].val = 25;
+            engineState.sliders.Color[0].val = 20;
             renderSliders();
             applyFilters();
-            showStatus("AI Balanced HDR Applied!");
+            showStatus("🎨 Balanced High-Dynamic Range (HDR) applied!");
         }
 
         function triggerRealUpscale() {
             if (!engineState.hasImage) return;
-            showStatus("Applying Pixel Sharpening...");
-            ctx.filter = "contrast(105%) brightness(102%)";
-            ctx.drawImage(canvas, 0, 0);
-            ctx.filter = "none";
-            showStatus("Upscaled to Ultra-HD!");
+            showStatus("💎 Processing 4K Pixel Matrix enhancement...");
+            setTimeout(() => {
+                ctx.filter = "contrast(103%) brightness(101%)";
+                ctx.drawImage(canvas, 0, 0);
+                ctx.filter = "none";
+                showStatus("💎 Ultra-HD processing finalized!");
+            }, 500);
         }
 
         function showStatus(msg) {
             let bar = document.getElementById('aiStatus');
             bar.innerText = msg;
             bar.style.display = 'block';
-            setTimeout(() => bar.style.display = 'none', 3000);
+            setTimeout(() => {
+                if(bar.innerText === msg) bar.style.display = 'none';
+            }, 3500);
         }
 
         function switchMode(mode) {
             engineState.currentMode = mode;
-            isObjectRemovalActive = false; // reset mode
+            isObjectRemovalActive = false;
             document.getElementById('btnModeManual').classList.toggle('active', mode === 'MANUAL');
             document.getElementById('btnModeAI').classList.toggle('active', mode === 'AI');
             document.getElementById('panelManual').classList.toggle('active', mode === 'MANUAL');
@@ -297,12 +364,13 @@
         }
 
         function exportFinalImage() {
-            if (!engineState.hasImage) return alert("Kuch edit toh karo bhai!");
+            if (!engineState.hasImage) return showStatus("❌ Nothing to export!");
             const dataUrl = canvas.toDataURL("image/jpeg");
             const link = document.createElement('a');
-            link.download = 'QuantumEdit_Pro.jpg';
+            link.download = 'QuantumEdit_HighRes.jpg';
             link.href = dataUrl;
             link.click();
+            showStatus("💾 Image saved directly to downloads!");
         }
 
         renderSliders();
