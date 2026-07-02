@@ -1,99 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantumEdit Pro</title>
-    <style>
-        body { margin: 0; background: #0a0a0a; color: #fff; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        /* Top Navigation */
-        .top-nav { height: 50px; background: #1f1f1f; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #333; }
-        
-        /* Main Layout */
-        .main-editor { flex: 1; display: flex; overflow: hidden; }
-        
-        /* Viewport (Image Display) */
-        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
-        #previewImage { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        /* Sidebar (Controls) */
-        .sidebar { width: 280px; background: #181818; padding: 20px; overflow-y: auto; border-left: 1px solid #333; }
-        
-        /* Bottom Navigation */
-        .bottom-nav { height: 50px; background: #1f1f1f; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #333; }
-        .tab { font-size: 12px; cursor: pointer; color: #888; }
-        .tab.active { color: #007aff; }
-        
-        input[type="range"] { width: 100%; margin-top: 10px; }
-    </style>
-</head>
+<html>
 <body>
-
-    <div class="top-nav">
-        <span>QuantumEdit Pro</span>
-        <!-- Image Loader -->
-        <input type="file" id="fileInput" accept="image/*" style="display:none">
-        <button onclick="document.getElementById('fileInput').click()">Load Photo</button>
-        <button onclick="alert('Exporting...')">Export</button>
-    </div>
-
-    <div class="main-editor">
-        <div class="viewport">
-            <img id="previewImage" src="" alt="Select a photo">
-        </div>
-        <div class="sidebar" id="controlPanel">
-            <!-- Sliders will appear here -->
-            <p style="color:#555;">Load a photo to start editing</p>
-        </div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="tab active" onclick="showControls('Light')">Light</div>
-        <div class="tab" onclick="showControls('Color')">Color</div>
+    <!-- 1. File Upload Button -->
+    <input type="file" id="imgInput" accept="image/*">
+    
+    <!-- 2. Image Container (The Viewport) -->
+    <div id="container" style="width: 100%; height: 500px; border: 2px solid red; margin-top: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <img id="myImage" src="" style="max-width: 100%; max-height: 100%; display: none;">
     </div>
 
     <script>
-        const preview = document.getElementById('previewImage');
-        const fileInput = document.getElementById('fileInput');
-        const controlPanel = document.getElementById('controlPanel');
+        const input = document.getElementById('imgInput');
+        const img = document.getElementById('myImage');
 
-        // State for filters
-        let filters = { exposure: 100, contrast: 100, saturation: 100 };
-
-        // 1. Image Loading Logic
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
+        input.onchange = function(e) {
+            const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = e => { preview.src = e.target.result; showControls('Light'); };
-                reader.readAsDataURL(file);
+                // Use URL.createObjectURL for faster, more reliable rendering
+                img.src = URL.createObjectURL(file);
+                img.style.display = 'block';
+                console.log("Image source set to:", img.src);
             }
-        });
-
-        // 2. Control Engine
-        function showControls(type) {
-            controlPanel.innerHTML = `<h3>${type}</h3>`;
-            if (type === 'Light') {
-                controlPanel.innerHTML += `
-                    <div>Exposure</div>
-                    <input type="range" min="50" max="150" value="${filters.exposure}" oninput="updateFilter('exposure', this.value)">
-                    <div>Contrast</div>
-                    <input type="range" min="50" max="150" value="${filters.contrast}" oninput="updateFilter('contrast', this.value)">
-                `;
-            } else {
-                controlPanel.innerHTML += `
-                    <div>Saturation</div>
-                    <input type="range" min="0" max="200" value="${filters.saturation}" oninput="updateFilter('saturation', this.value)">
-                `;
-            }
-        }
-
-        // 3. Filter Application Engine
-        function updateFilter(key, val) {
-            filters[key] = val;
-            preview.style.filter = `brightness(${filters.exposure}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%)`;
-        }
+        };
     </script>
 </body>
 </html>
+
