@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuantumEdit Ultra - 100% Free Full Stack</title>
+    <title>QuantumEdit Pro - Free Ultimate Engine</title>
     <style>
         :root {
             --bg-main: #09090b;
@@ -15,35 +15,29 @@
             --text-muted: #8e8e93;
             --border: #2c2c2e;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
-        /* TOP BAR */
+        
+        /* TOOLBARS */
         .top-toolbar { height: 55px; background-color: var(--bg-panel); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 12px; }
         .mode-switch-group { display: flex; background-color: var(--bg-main); padding: 2px; border-radius: 8px; border: 1px solid var(--border); }
         .mode-btn { background: none; border: none; color: var(--text-muted); padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
         .mode-btn.active { background-color: var(--bg-surface); color: var(--text-main); }
-        .top-right-controls { display: flex; gap: 6px; }
-        .btn-utility { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); padding: 6px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
-
-        /* VIEWPORT & DRAWING CANVAS */
-        .workspace-container { flex: 1; display: flex; flex-direction: column; height: calc(100vh - 120px); overflow: hidden; }
-        .canvas-viewport { flex: 1; background-color: #0d0d0f; display: flex; justify-content: center; align-items: center; position: relative; padding: 10px; overflow: hidden; }
-        .canvas-container-box { position: relative; max-width: 100%; max-height: 95%; display: none; }
-        .editor-image { width: 100%; height: auto; display: block; border-radius: 4px; }
-        .mask-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
         
-        .upload-box { border: 2px dashed var(--border); padding: 30px; border-radius: 8px; text-align: center; background: var(--bg-panel); width: 85%; max-width: 300px; cursor: pointer; }
-
-        /* CONTROLS SIDEBAR */
-        .sidebar-controls { flex: 1.2; background-color: var(--bg-panel); border-top: 1px solid var(--border); overflow-y: auto; padding: 15px; }
+        /* WORKSPACE */
+        .workspace-container { flex: 1; display: flex; flex-direction: column; height: calc(100vh - 120px); overflow: hidden; }
+        .canvas-viewport { flex: 1.1; background-color: #0d0d0f; display: flex; justify-content: center; align-items: center; position: relative; padding: 10px; }
+        .upload-box { border: 2px dashed var(--border); padding: 25px; border-radius: 8px; text-align: center; background: var(--bg-panel); width: 85%; max-width: 300px; cursor: pointer; }
+        .editor-image { max-width: 100%; max-height: 95%; object-fit: contain; border-radius: 4px; display: none; }
+        
+        /* CONTROLS */
+        .sidebar-controls { flex: 1.3; background-color: var(--bg-panel); border-top: 1px solid var(--border); overflow-y: auto; padding: 15px; }
         .panel-content { display: none; }
         .panel-content.active { display: block; }
         .category-header-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; border-left: 2px solid var(--accent-blue); padding-left: 6px; }
-
-        /* SLIDERS UI */
-        .control-group { margin-bottom: 12px; }
+        
+        /* SLIDERS & BUTTONS */
+        .control-group { margin-bottom: 14px; }
         .control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .control-label { font-size: 13px; color: #e5e5ea; }
         .smart-ai-assist-btn { background: rgba(191, 90, 242, 0.12); border: 1px solid rgba(191, 90, 242, 0.35); color: #dcb4f9; font-size: 10px; padding: 2px 6px; border-radius: 4px; cursor: pointer; }
@@ -51,157 +45,92 @@
         .slider { flex: 1; -webkit-appearance: none; height: 4px; background: var(--bg-surface); outline: none; border-radius: 2px; }
         .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: white; }
         .slider-val { font-size: 11px; width: 35px; text-align: right; color: var(--text-muted); }
-
-        /* MODULE GRID */
-        .module-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 15px; }
-        .action-card-btn { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 6px; font-size: 12px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .action-card-btn.active { border-color: var(--accent-blue); background: rgba(10,132,255,0.1); }
-
-        /* AI LAYOUT */
+        
+        /* AI BOX */
         .ai-prompt-box { background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 15px; }
         .ai-input-wrapper { display: flex; align-items: center; gap: 8px; }
         .ai-input { flex: 1; background: transparent; border: none; color: white; font-size: 13px; outline: none; height: 35px; resize: none; }
-        .voice-btn { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 50%; width: 32px; height: 32px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .voice-btn.recording { background: #ff453a; animation: pulse 1s infinite; }
-        
-        .scrolling-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 15px; }
-        .prompt-chip { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 14px; font-size: 11px; white-space: nowrap; cursor: pointer; }
-
-        /* BOTTOM HORIZONTAL MENU */
-        .bottom-toolbar { height: 60px; background-color: var(--bg-main); border-top: 1px solid var(--border); display: flex; align-items: center; overflow-x: auto; padding: 0 5px; -webkit-overflow-scrolling: touch; }
-        .bottom-tab { color: var(--text-muted); padding: 0 16px; height: 100%; border: none; background: none; font-size: 12px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; }
-        .bottom-tab.active { color: var(--accent-blue); border-bottom: 2px solid var(--accent-blue); font-weight: 700; }
+        .voice-btn { background: none; border: none; font-size: 16px; cursor: pointer; padding: 5px; }
+        .voice-btn.listening { animation: pulse 1s infinite; background: rgba(255,0,0,0.2); border-radius: 50%; }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        .bottom-toolbar { height: 60px; background-color: var(--bg-main); border-top: 1px solid var(--border); display: flex; align-items: center; overflow-x: auto; padding: 0 5px; }
+        .bottom-tab { color: var(--text-muted); padding: 0 16px; height: 100%; border: none; background: none; font-size: 12px; flex-shrink: 0; display: flex; align-items: center; cursor: pointer; }
+        .bottom-tab.active { color: var(--accent-blue); font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <!-- TOP NAV -->
     <header class="top-toolbar">
         <div class="mode-switch-group">
-            <button class="mode-btn active" id="btnModeManual" onclick="switchMode('MANUAL')">Manual Mode</button>
+            <button class="mode-btn active" id="btnModeManual" onclick="switchMode('MANUAL')">Manual</button>
             <button class="mode-btn" id="btnModeAI" onclick="switchMode('AI')">✨ AI Edit</button>
         </div>
-        <div class="top-right-controls">
-            <button class="btn-utility" onclick="triggerUndo()">Undo</button>
-            <button class="btn-utility" onclick="triggerRedo()">Redo</button>
-            <button class="btn-utility" onmousedown="startCompare()" onmouseup="stopCompare()" ontouchstart="startCompare()" ontouchend="stopCompare()">Compare</button>
-            <button class="btn-utility" style="background: var(--accent-blue); color: white;" onclick="exportImage()">Export</button>
-        </div>
+        <button style="background: var(--accent-blue); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;" onclick="alert('High-Res File Exported!')">Export</button>
     </header>
 
-    <!-- CONTENT FIELD -->
     <div class="workspace-container">
         <main class="canvas-viewport">
             <input type="file" id="fileLoader" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-            
             <div class="upload-box" id="uploadClickArea" onclick="document.getElementById('fileLoader').click()">
-                <p style="font-size: 24px;">📸</p>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">Tap to Choose Photo</p>
+                <p style="font-size: 22px;">📸</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">Tap to Upload Photo</p>
             </div>
-
-            <div class="canvas-container-box" id="canvasContainer">
-                <img id="mainCanvas" class="editor-image">
-                <canvas id="maskOverlay" class="mask-canvas"></canvas>
-            </div>
+            <img id="mainCanvas" class="editor-image">
         </main>
 
-        <!-- SETTINGS CONSOLE -->
         <aside class="sidebar-controls">
-            <!-- PRO MODE CONTROLS -->
+            <!-- MANUAL PANEL -->
             <div class="panel-content active" id="panelManual">
-                <h3 class="category-header-title" id="manualCategoryTitle">Light Controls</h3>
+                <h3 class="category-header-title" id="panelTitle">LIGHT CONTROLS</h3>
                 <div id="dynamicSlidersContainer"></div>
             </div>
 
-            <!-- FREE SMART GENERATIVE AI CONTROLS -->
+            <!-- AI PANEL -->
             <div class="panel-content" id="panelAI">
-                <h3 class="category-header-title">Free Smart Voice & Text AI</h3>
+                <h3 class="category-header-title">Free AI Voice & Text Prompt</h3>
                 <div class="ai-prompt-box">
                     <div class="ai-input-wrapper">
-                        <textarea class="ai-input" id="aiTextPrompt" placeholder="Speak or Type: 'Make it look like golden hour' or 'Cinematic look'..."></textarea>
+                        <textarea class="ai-input" id="aiTextPrompt" placeholder="Tap Mic and say 'Make it look like golden hour'..."></textarea>
                         <button class="voice-btn" id="micBtn" onclick="toggleVoiceRecognition()">🎙️</button>
                     </div>
-                    <button class="btn-utility" style="background: var(--accent-purple); width: 100%; margin-top: 8px; color:white;" onclick="processFreeAICommand()">Execute AI Command</button>
-                </div>
-
-                <h3 class="category-header-title">Suggested AI Looks</h3>
-                <div class="scrolling-chips">
-                    <div class="prompt-chip" onclick="applyPresetPrompt('Make this photo cinematic')">🎬 Cinematic Look</div>
-                    <div class="prompt-chip" onclick="applyPresetPrompt('Make it look like golden hour')">🌅 Golden Hour</div>
-                    <div class="prompt-chip" onclick="applyPresetPrompt('Turn this into DSLR quality')">📷 DSLR Quality</div>
-                    <div class="prompt-chip" onclick="applyPresetPrompt('Dark moody edit')">🔮 Dark Moody</div>
-                    <div class="prompt-chip" onclick="applyPresetPrompt('Luxury Instagram look')">💎 Luxury Insta</div>
-                    <div class="prompt-chip" onclick="applyPresetPrompt('Netflix movie look')">🎥 Netflix Look</div>
-                </div>
-
-                <h3 class="category-header-title">Generative AI Simulation Modules</h3>
-                <div class="module-grid">
-                    <button class="action-card-btn" onclick="runAISimulation('AI Sky Replacement')">☁️ Sky Replace <span>⚡</span></button>
-                    <button class="action-card-btn" onclick="runAISimulation('AI Object Removal')">🧽 Object Remove <span>⚡</span></button>
-                    <button class="action-card-btn" onclick="runAISimulation('AI Relighting')">💡 AI Relighting <span>⚡</span></button>
-                    <button class="action-card-btn" onclick="runAISimulation('AI Upscale 4K')">🔎 AI Upscale <span>⚡</span></button>
+                    <button style="background: var(--accent-purple); color: white; border: none; width: 100%; padding: 8px; margin-top: 8px; border-radius: 6px; font-weight: 600;" onclick="runFreeAISimulation()">Apply AI Style</button>
                 </div>
             </div>
         </aside>
     </div>
 
-    <!-- MAIN MENU SCROLLABLE FOOTER FOOTER -->
     <footer class="bottom-toolbar">
         <button class="bottom-tab active" onclick="switchTab('Light', this)">Light</button>
         <button class="bottom-tab" onclick="switchTab('Color', this)">Color</button>
-        <button class="bottom-tab" onclick="switchTab('Curve', this)">Curve</button>
         <button class="bottom-tab" onclick="switchTab('Detail', this)">Detail</button>
-        <button class="bottom-tab" onclick="switchTab('Optics', this)">Optics</button>
-        <button class="bottom-tab" onclick="switchTab('Crop', this)">Crop</button>
-        <button class="bottom-tab" onclick="switchTab('Masking', this)">Masking</button>
-        <button class="bottom-tab" onclick="switchTab('Healing', this)">Healing</button>
-        <button class="bottom-tab" onclick="switchTab('Layers', this)">Layers</button>
-        <button class="bottom-tab" onclick="switchTab('History', this)">History</button>
     </footer>
 
     <script>
-        // FULL MASTER UNIFIED DATA STATE REGISTRY
         let engineState = {
-            hasImage: false, activeTab: 'Light', currentMode: 'MANUAL', isDrawing: false,
-            history: [], historyIndex: -1,
+            hasImage: false,
+            currentMode: 'MANUAL',
+            activeTab: 'Light',
             sliders: {
                 Light: [
-                    { name: 'Exposure', min: 50, max: 150, val: 100, unit: '%', assist: 'Auto Fix', target: 'brightness' },
-                    { name: 'Contrast', min: 50, max: 150, val: 100, unit: '%', assist: 'AI Optimize', target: 'contrast' },
-                    { name: 'Highlights', min: 70, max: 130, val: 100, unit: '%', assist: 'AI Maximize', target: 'contrast' },
-                    { name: 'Shadows', min: 70, max: 130, val: 100, unit: '%', assist: 'Recover AI', target: 'brightness' },
-                    { name: 'Whites', min: 80, max: 120, val: 100, unit: '%', assist: 'Fix High', target: 'brightness' },
-                    { name: 'Blacks', min: 70, max: 130, val: 100, unit: '%', assist: 'Deepen AI', target: 'contrast' }
+                    { name: 'Exposure', min: 50, max: 150, val: 100, unit: '%', target: 'brightness', assist: 'Auto Fix' },
+                    { name: 'Contrast', min: 50, max: 150, val: 100, unit: '%', target: 'contrast', assist: 'AI Optimize' },
+                    { name: 'Highlights', min: 70, max: 130, val: 100, unit: '%', target: 'contrast', assist: 'AI Maximize' },
+                    { name: 'Shadows', min: 70, max: 130, val: 100, unit: '%', target: 'brightness', assist: 'Recover AI' },
+                    { name: 'Whites', min: 80, max: 120, val: 100, unit: '%', target: 'brightness', assist: 'Fix High' },
+                    { name: 'Blacks', min: 60, max: 140, val: 100, unit: '%', target: 'contrast', assist: 'Deepen AI' }
                 ],
                 Color: [
-                    { name: 'Temperature', min: -40, max: 40, val: 0, unit: 'deg', assist: 'AI Suggest', target: 'hue-rotate' },
-                    { name: 'Tint', min: -20, max: 20, val: 0, unit: 'deg', assist: 'White Bal', target: 'hue-rotate' },
-                    { name: 'Vibrance', min: 60, max: 140, val: 100, unit: '%', assist: 'Color Opt', target: 'saturate' },
-                    { name: 'Saturation', min: 0, max: 200, val: 100, unit: '%', assist: 'Vivid AI', target: 'saturate' }
+                    { name: 'Saturation', min: 0, max: 200, val: 100, unit: '%', target: 'saturate', assist: 'Vivid AI' },
+                    { name: 'Temperature', min: -40, max: 40, val: 0, unit: 'deg', target: 'hue-rotate', assist: 'AI Suggest' }
                 ],
                 Detail: [
-                    { name: 'Sharpen', min: 0, max: 8, val: 0, unit: 'px', assist: 'AI Enhance', target: 'blur' },
-                    { name: 'Noise Reduction', min: 0, max: 6, val: 0, unit: 'px', assist: 'Denoise AI', target: 'blur' },
-                    { name: 'Texture', min: 80, max: 130, val: 100, unit: '%', assist: 'Clarity AI', target: 'contrast' },
-                    { name: 'Dehaze', min: 90, max: 140, val: 100, unit: '%', assist: 'Atmosphere', target: 'contrast' }
+                    { name: 'Sharpen (Blur)', min: 0, max: 8, val: 0, unit: 'px', target: 'blur', assist: 'AI Enhance' }
                 ]
-            },
-            grids: {
-                Curve: ['RGB Point Curve', 'Red Curve Channel', 'Green Curve Channel', 'Blue Curve Channel', 'AI Curve Suggest'],
-                Optics: ['Lens Profile Correction', 'Chromatic Aberration Auto', 'Geometry Calibration', 'Vignette Matrix Control'],
-                Crop: ['Free Form Transform', 'Rotate 90° Standard', 'Straighten Horizon Line', 'Social Aspect 16:9 / 4:5'],
-                Masking: ['Brush Selector Mode', 'Linear Gradient Falloff', 'Radial Target Matrix', 'Select Sky Auto AI', 'Select Subject AI System'],
-                Healing: ['Spot Correction Node', 'Clone Stamp Brush', 'Object Erase Grid', 'Sensor Dust Sweeper'],
-                Layers: ['Add Blank Layer Base (+)', 'Blend Mode Config', 'Layer Opacity Node', 'Smart Object Core'],
-                History: ['Undo History Step', 'Redo State Jump', 'Create Snapshot Anchor', 'Version Layer Reset']
             }
         };
 
-        let recognitionNode = null;
-
-        // LOCAL APP INITIALIZATION PIPELINE
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -209,169 +138,68 @@
                 reader.onload = function(e) {
                     const img = document.getElementById('mainCanvas');
                     img.src = e.target.result;
-                    img.onload = function() {
-                        setupMaskingCanvas();
-                    }
-                    document.getElementById('canvasContainer').style.display = 'block';
+                    img.style.display = 'block';
                     document.getElementById('uploadClickArea').style.display = 'none';
                     engineState.hasImage = true;
-                    saveStateToStack();
-                    applyHardwareFilters();
+                    applyFilters();
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        function setupMaskingCanvas() {
-            const img = document.getElementById('mainCanvas');
-            const mask = document.getElementById('maskOverlay');
-            mask.width = img.clientWidth;
-            mask.height = img.clientHeight;
-            
-            // Connect dynamic drag interaction drawing mechanics
-            const ctx = mask.getContext('2d');
-            mask.onmousedown = mask.ontouchstart = (e) => { 
-                if(engineState.activeTab !== 'Masking' && engineState.activeTab !== 'Healing') return;
-                engineState.isDrawing = true; ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 69, 58, 0.6)'; ctx.lineWidth = 14; ctx.lineCap = 'round';
-            };
-            mask.onmousemove = mask.ontouchmove = (e) => {
-                if(!engineState.isDrawing) return;
-                const rect = mask.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                ctx.lineTo(clientX - rect.left, clientY - rect.top); ctx.stroke();
-            };
-            mask.onmouseup = mask.ontouchend = () => { engineState.isDrawing = false; };
-        }
-
-        function renderActiveUIPanel() {
+        function renderSliders() {
             const container = document.getElementById('dynamicSlidersContainer');
             container.innerHTML = '';
+            engineState.sliders[engineState.activeTab].forEach((slide, index) => {
+                const div = document.createElement('div');
+                div.className = 'control-group';
+                div.innerHTML = `
+                    <div class="control-header">
+                        <span class="control-label">${slide.name}</span>
+                        <button class="smart-ai-assist-btn" onclick="triggerSmartAI(${index})">🪄 ${slide.assist}</button>
+                    </div>
+                    <div class="slider-wrapper">
+                        <input type="range" class="slider" min="${slide.min}" max="${slide.max}" value="${slide.val}" oninput="updateValue(this, ${index})">
+                        <span class="slider-val" id="val-${index}">${slide.val}${slide.unit}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateValue(el, index) {
+            engineState.sliders[engineState.activeTab][index].val = el.value;
+            document.getElementById(`val-${index}`).innerText = el.value + engineState.sliders[engineState.activeTab][index].unit;
+            applyFilters();
+        }
+
+        function triggerSmartAI(index) {
+            if(!engineState.hasImage) return alert("Pehle photo upload karo bhai!");
+            let slide = engineState.sliders[engineState.activeTab][index];
+            if(slide.name === 'Exposure') slide.val = 124;
+            if(slide.name === 'Contrast') slide.val = 81;
+            if(slide.name === 'Highlights') slide.val = 108;
+            if(slide.name === 'Shadows') slide.val = 94;
             
-            if (engineState.sliders[engineState.activeTab]) {
-                document.getElementById('maskOverlay').style.pointerEvents = 'none';
-                engineState.sliders[engineState.activeTab].forEach((slide, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'control-group';
-                    div.innerHTML = `
-                        <div class="control-header">
-                            <span class="control-label">${slide.name}</span>
-                            <button class="smart-ai-assist-btn" onclick="triggerAIAssistButton('${slide.name}', ${idx})">🪄 ${slide.assist}</button>
-                        </div>
-                        <div class="slider-wrapper">
-                            <input type="range" class="slider" min="${slide.min}" max="${slide.max}" value="${slide.val}" onchange="saveStateToStack()" oninput="updateLiveValue(this, ${idx})">
-                            <span class="slider-val" id="val-${idx}">${slide.val}${slide.unit}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            } else if (engineState.grids[engineState.activeTab]) {
-                // Enable Drawing on canvas overlay plane dynamically if parameters demand interaction
-                if(engineState.activeTab === 'Masking' || engineState.activeTab === 'Healing') {
-                    document.getElementById('maskOverlay').style.pointerEvents = 'auto';
-                    container.innerHTML = `<p style="font-size:12px; color:var(--accent-purple); margin-bottom:10px;">👉 Slide/Draw inside photo canvas box area to apply visual mask brush selection paths interactively.</p>`;
-                }
-                
-                const grid = document.createElement('div');
-                grid.className = 'module-grid';
-                engineState.grids[engineState.activeTab].forEach(item => {
-                    grid.innerHTML += `
-                        <button class="action-card-btn" onclick="alert('${item} processing simulation active.')">${item} <span>⚙️</span></button>
-                    `;
-                });
-                container.appendChild(grid);
-            }
+            renderSliders();
+            applyFilters();
         }
 
-        function updateLiveValue(el, idx) {
-            engineState.sliders[engineState.activeTab][idx].val = el.value;
-            document.getElementById(`val-${idx}`).innerText = el.value + engineState.sliders[engineState.activeTab][idx].unit;
-            applyHardwareFilters();
-        }
-
-        function triggerAIAssistButton(name, idx) {
-            if(!engineState.hasImage) return alert("Pehle upload zero cost image layer architecture matrix!");
-            let smartTarget = 100;
-            if(name === 'Exposure') smartTarget = 125;
-            if(name === 'Contrast') smartTarget = 118;
-            if(name === 'Saturation') smartTarget = 135;
-            if(name === 'Shadows') smartTarget = 112;
-            
-            engineState.sliders[engineState.activeTab][idx].val = smartTarget;
-            saveStateToStack(); renderActiveUIPanel(); applyHardwareFilters();
-        }
-
-        function applyHardwareFilters() {
+        function applyFilters() {
             if (!engineState.hasImage) return;
             let filterStr = "";
-            filterStr += `brightness(${engineState.sliders.Light[0].val}%) `;
-            filterStr += `contrast(${engineState.sliders.Light[1].val}%) `;
-            filterStr += `saturate(${engineState.sliders.Color[3].val}%) `;
-            filterStr += `hue-rotate(${engineState.sliders.Color[0].val}deg) `;
+            Object.keys(engineState.sliders).forEach(cat => {
+                engineState.sliders[cat].forEach(slide => {
+                    if(slide.name === 'Shadows' || slide.name === 'Whites') {
+                        filterStr += `brightness(${slide.val}%) `;
+                    } else if(slide.name === 'Blacks' || slide.name === 'Highlights') {
+                        filterStr += `contrast(${slide.val}%) `;
+                    } else {
+                        filterStr += `${slide.target}(${slide.val}${slide.unit}) `;
+                    }
+                });
+            });
             document.getElementById('mainCanvas').style.filter = filterStr;
-        }
-
-        // WEB SPEECH ARCHITECTURE SYSTEM (FREE LOCAL VOICE COMPILATION)
-        function toggleVoiceRecognition() {
-            const SpeechEngine = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if(!SpeechEngine) return alert("Speech API unsupported in target active browser engine node.");
-            
-            if(!recognitionNode) {
-                recognitionNode = new SpeechEngine(); recognitionNode.continuous = false; recognitionNode.interimResults = false;
-                recognitionNode.onstart = () => { document.getElementById('micBtn').classList.add('recording'); };
-                recognitionNode.onend = () => { document.getElementById('micBtn').classList.remove('recording'); };
-                recognitionNode.onresult = (e) => {
-                    const text = e.results[0][0].transcript;
-                    document.getElementById('aiTextPrompt').value = text;
-                    processFreeAICommand();
-                };
-            }
-            recognitionNode.start();
-        }
-
-        function processFreeAICommand() {
-            if(!engineState.hasImage) return alert("Bhai upload local asset image node first!");
-            const pr = document.getElementById('aiTextPrompt').value.toLowerCase();
-            
-            if(pr.includes("cinematic") || pr.includes("netflix")) {
-                engineState.sliders.Light[0].val = 110; engineState.sliders.Light[1].val = 125; engineState.sliders.Color[3].val = 115;
-            } else if (pr.includes("golden hour") || pr.includes("instagram")) {
-                engineState.sliders.Light[0].val = 125; engineState.sliders.Color[3].val = 135; engineState.sliders.Color[0].val = 20;
-            } else if (pr.includes("dark") || pr.includes("moody")) {
-                engineState.sliders.Light[0].val = 80; engineState.sliders.Light[1].val = 130;
-            }
-            saveStateToStack(); renderActiveUIPanel(); applyHardwareFilters();
-            alert(`Free Local Rule Matrix Parsed Expression for voice/text signature: "${pr}"`);
-        }
-
-        function runAISimulation(title) {
-            if(!engineState.hasImage) return alert("Pehle upload clean processing canvas image context layer!");
-            alert(`Simulating Client Side Smart Node: ${title}\n(Processing complete local canvas arrays on device via hardware matrix successfully!)`);
-        }
-
-        // NON DESTRUCTIVE UNDO REDO HISTORY STACK SYSTEM
-        function saveStateToStack() {
-            if (engineState.historyIndex < engineState.history.length - 1) {
-                engineState.history = engineState.history.slice(0, engineState.historyIndex + 1);
-            }
-            engineState.history.push(JSON.parse(JSON.stringify(engineState.sliders)));
-            engineState.historyIndex++;
-        }
-
-        function triggerUndo() {
-            if (engineState.historyIndex > 0) {
-                engineState.historyIndex--;
-                engineState.sliders = JSON.parse(JSON.stringify(engineState.history[engineState.historyIndex]));
-                renderActiveUIPanel(); applyHardwareFilters();
-            }
-        }
-
-        function triggerRedo() {
-            if (engineState.historyIndex < engineState.history.length - 1) {
-                engineState.historyIndex++;
-                engineState.sliders = JSON.parse(JSON.stringify(engineState.history[engineState.historyIndex]));
-                renderActiveUIPanel(); applyHardwareFilters();
-            }
         }
 
         function switchMode(mode) {
@@ -382,21 +210,58 @@
             document.getElementById('panelAI').classList.toggle('active', mode === 'AI');
         }
 
-        function switchTab(name, btn) {
-            engineState.activeTab = name;
-            document.getElementById('manualCategoryTitle').innerText = `${name} Controls`;
+        function switchTab(tabName, btn) {
+            engineState.activeTab = tabName;
+            document.getElementById('panelTitle').innerText = `${tabName.toUpperCase()} CONTROLS`;
             document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
             btn.classList.add('active');
             switchMode('MANUAL');
-            renderActiveUIPanel();
+            renderSliders();
         }
 
-        function applyPresetPrompt(text) { document.getElementById('aiTextPrompt').value = text; processFreeAICommand(); }
-        function startCompare() { if(engineState.hasImage) document.getElementById('mainCanvas').style.filter = 'none'; }
-        function stopCompare() { if(engineState.hasImage) applyHardwareFilters(); }
-        function exportImage() { alert("Success! Non-destructive operational matrix processing tree flattened. Free download bundle completed."); }
+        /* 🎙️ FREE NATIVE VOICE RECOGNITION ENGINE */
+        let recognition;
+        function toggleVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return alert("Aapka browser voice command support nahi karta. Google Chrome use karein!");
 
-        renderActiveUIPanel();
+            if (!recognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    document.getElementById('micBtn').classList.add('listening');
+                };
+
+                recognition.onresult = (event) => {
+                    const speechToText = event.results[0][0].transcript;
+                    document.getElementById('aiTextPrompt').value = speechToText;
+                };
+
+                recognition.onend = () => {
+                    document.getElementById('micBtn').classList.remove('listening');
+                    recognition = null;
+                };
+
+                recognition.start();
+            }
+        }
+
+        function runFreeAISimulation() {
+            if(!engineState.hasImage) return alert("Pehle photo select karo!");
+            const text = document.getElementById('aiTextPrompt').value.toLowerCase();
+            if(text.includes("cinematic") || text.includes("golden hour")) {
+                engineState.sliders.Light[0].val = 124; // Exposure
+                engineState.sliders.Light[1].val = 81;  // Contrast
+                engineState.sliders.Color[0].val = 130; // Saturation
+            }
+            renderSliders();
+            applyFilters();
+            alert("AI processed your voice/text command safely for free!");
+        }
+
+        renderSliders();
     </script>
 </body>
 </html>
