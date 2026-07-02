@@ -1,42 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <style>
-        body { margin: 0; background: #121212; color: #ccc; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
-        /* Pro Toolbar */
-        .top-nav { height: 50px; background: #1f1f1f; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #333; }
-        /* Workspace */
-        .main-editor { display: flex; flex: 1; }
-        /* Left/Right Panels */
-        .sidebar { width: 280px; background: #181818; display: flex; flex-direction: column; overflow-y: auto; }
-        /* Canvas Area */
-        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; background: #000; }
-        /* Bottom Tab Bar */
-        .bottom-nav { height: 60px; background: #1f1f1f; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #333; }
-        .tab { font-size: 12px; cursor: pointer; color: #888; }
-        .tab.active { color: #fff; }
-    </style>
-</head>
-<body>
-    <div class="top-nav">
-        <span>QuantumEdit Pro</span>
-        <button>Export</button>
-    </div>
-    <div class="main-editor">
-        <div class="viewport">
-            <canvas id="canvas"></canvas>
-        </div>
-        <div class="sidebar">
-            <!-- Yahan sliders aayenge -->
-            <div style="padding: 20px;">Exposure: <input type="range" style="width: 100%;"></div>
-            <div style="padding: 20px;">Contrast: <input type="range" style="width: 100%;"></div>
-        </div>
-    </div>
-    <div class="bottom-nav">
-        <div class="tab active">Light</div>
-        <div class="tab">Color</div>
-        <div class="tab">Effects</div>
-        <div class="tab">AI Mode</div>
-    </div>
-</body>
-</html>
+<!-- Yeh code tumhare existing HTML ke neeche <script> tag mein jayega -->
+<script>
+    // 1. App State (Sabse Important: Sab kuch yahi se control hoga)
+    const state = {
+        activeTab: 'Light',
+        filters: {
+            exposure: 100, contrast: 100, saturation: 100, warmth: 0
+        }
+    };
+
+    // 2. Tab Switching Engine
+    function switchTab(tabName) {
+        state.activeTab = tabName;
+        // Sidebar update karo tab ke hisab se
+        const sidebar = document.querySelector('.sidebar');
+        if (tabName === 'Light') {
+            sidebar.innerHTML = `
+                <div style="padding: 20px;">Exposure: <input type="range" min="50" max="150" value="${state.filters.exposure}" oninput="updateFilter('exposure', this.value)"></div>
+                <div style="padding: 20px;">Contrast: <input type="range" min="50" max="150" value="${state.filters.contrast}" oninput="updateFilter('contrast', this.value)"></div>
+            `;
+        } else if (tabName === 'Color') {
+            sidebar.innerHTML = `
+                <div style="padding: 20px;">Saturation: <input type="range" min="0" max="200" value="${state.filters.saturation}" oninput="updateFilter('saturation', this.value)"></div>
+            `;
+        }
+    }
+
+    // 3. Image Processing Engine (Fast & Free)
+    function updateFilter(key, value) {
+        state.filters[key] = value;
+        const img = document.getElementById('mainImage');
+        // CSS Filter hi asli engine hai - ye 0 lag deta hai!
+        img.style.filter = `brightness(${state.filters.exposure}%) contrast(${state.filters.contrast}%) saturate(${state.filters.saturation}%)`;
+    }
+
+    // Tab buttons par click event lagao
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            switchTab(tab.innerText);
+        });
+    });
+
+    // Default tab load karo
+    switchTab('Light');
+                </script>
+                
