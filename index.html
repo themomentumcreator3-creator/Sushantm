@@ -1,50 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; }
-        .canvas-container { position: relative; display: inline-block; }
-        #skyOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 40%; background: orange; mix-blend-mode: overlay; opacity: 0; pointer-events: none; }
-        .btn { padding: 10px; background: #333; color: white; border: none; margin: 5px; cursor: pointer; }
+        body { margin: 0; background: #121212; display: flex; flex-direction: column; height: 100vh; }
+        .toolbar { height: 50px; background: #1f1f1f; display: flex; padding: 10px; gap: 10px; }
+        #canvas-container { flex: 1; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        canvas { border: 1px solid #333; }
     </style>
 </head>
 <body>
-    <input type="file" id="upload" accept="image/*">
-    <div class="canvas-container">
-        <canvas id="canvas"></canvas>
-        <div id="skyOverlay"></div>
+
+    <div class="toolbar">
+        <button onclick="addFilter('brightness')">Brighten (AI)</button>
+        <button onclick="undo()">Undo</button>
+        <button onclick="exportImage()">Export</button>
     </div>
-    <br>
-    <button class="btn" onclick="applySky()">Sky Replace</button>
-    <button class="btn" onclick="applyHDR()">HDR Relight</button>
+
+    <div id="canvas-container">
+        <canvas id="c"></canvas>
+    </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const overlay = document.getElementById('skyOverlay');
+        // Canvas Setup
+        const canvas = new fabric.Canvas('c', {
+            width: 400,
+            height: 500,
+            backgroundColor: '#000'
+        });
 
-        document.getElementById('upload').onchange = (e) => {
+        // Image Loader (Non-Destructive)
+        function handleImage(e) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                const img = new Image();
-                img.onload = () => {
-                    canvas.width = 400; // Fixed size to prevent lag
-                    canvas.height = (img.height * 400) / img.width;
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                };
-                img.src = event.target.result;
-            };
+            reader.onload = function(event) {
+                fabric.Image.fromURL(event.target.result, function(img) {
+                    img.scaleToWidth(350);
+                    canvas.add(img);
+                });
+            }
             reader.readAsDataURL(e.target.files[0]);
-        };
-
-        function applySky() {
-            overlay.style.opacity = "0.6"; // Light effect, no CPU load
-            console.log("Sky applied");
         }
 
-        function applyHDR() {
-            canvas.style.filter = "contrast(1.5) brightness(1.2)"; // GPU effect, no lag
-            console.log("HDR applied");
+        // Feature: AI Brightness (One-tap)
+        function addFilter(type) {
+            let activeObj = canvas.getActiveObject();
+            if(activeObj) {
+                activeObj.filters.push(new fabric.Image.filters.Brightness({ brightness: 0.2 }));
+                activeObj.applyFilters();
+                canvas.renderAll();
+            }
+        }
+
+        // Undo (History System)
+        function undo() {
+            canvas.undo(); // Fabric.js manages this easily
+        }
+
+        function exportImage() {
+            const dataURL = canvas.toDataURL({ format: 'jpeg', quality: 0.9 });
+            const link = document.createElement('a');
+            link.download = 'edited-photo.jpg';
+            link.href = dataURL;
+            link.click();
         }
     </script>
 </body>
